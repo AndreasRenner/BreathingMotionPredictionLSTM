@@ -1,4 +1,4 @@
-# Author: Ing. Ingo Gulyas, MSc, MSc
+# Authors: Ing. Ingo Gulyas, MSc, MSc; DI Dr. Andreas Renner
 # Date: 19.05.2022
 # Medical University of Vienna / AKH Wien
 # Department of Radiation Oncology
@@ -9,9 +9,6 @@ import os
 from train_gridsearch import *
 from train_crossval import *
 from core_functions import *
-
-
-
 
 
 # disable warning messages
@@ -31,55 +28,16 @@ logger.setLevel(logging.CRITICAL)
 # KALMAN INFO: RMSE @ 500 ms prediction horizon -> 1.33 mm (22 % @ 6 mm)
 #              RMSE without prediction -> 1.87 mm
 
-# BREATHING DATA INFO:
-# +0 .. original
-# +1 .. lin-interpolation, 50ms
-# +2 .. spline interpolation, 50ms
-# +3 .. without baseline, original
-# +4 .. without baseline, lin-interpolation 50ms
-# +5 .. without baseline, spline-interpolation 50ms
-# +6 .. augmented
-# +7 .. augmented
-# +8 .. augmented
-# +9 -> filtered signal, with baseline, linear interpolation 50 ms
-#+10 -> filtered signal, without baseline, linear interpolation 50 ms
-#+11 -> filtered signal, without baseline, linear interpolation 50 ms, first amplitude
-#+12 -> filtered signal, without baseline, linear interpolation 50 ms, second amplitude
-
-
-
 ########################################################################################################################
 # global settings
 ########################################################################################################################
 
 BASE_DIR = './VALIDATION-PHASE'
 
-#training_amp1_ids = [9011, 3011, 26011, 16011, 11011, 18011, 19011, 17011, 2011, 13011, 12011, 31011, 15011, 44011, 46011, 47011, 48011, 49011, 50011, 51011]
-#training_amp2_ids = [9012, 3012, 26012, 16012, 11012, 18012, 19012, 17012, 2012, 13012, 12012, 31012, 15012, 44012, 46012, 47012, 48012, 49012, 50012, 51012]
-#training_amp_ids = [9011, 3011, 26011, 16011, 11011, 18011, 19011, 17011, 2011, 13011, 12011, 31011, 15011, 44011, 46011, 47011, 48011, 49011, 50011, 51011, 9012, 3012, 26012, 16012, 11012, 18012, 19012, 17012, 2012, 13012, 12012, 31012, 15012, 44012, 46012, 47012, 48012, 49012, 50012, 51012]
-
-#testing_amp1_ids = [14011, 10011, 7011, 21011, 45011]
-#testing_amp2_ids = [14012, 10012, 7012, 21012, 45012]
-#testing_amp_ids = [14011, 10011, 7011, 21011, 45011, 14012, 10012, 7012, 21012, 45012]
-
-#training_ids = training_amp_ids
-#testing_ids = testing_amp_ids
-
-training_ids = [9011, 9012, 3011, 3012, 26011, 26012, 16011, 16012, 11011, 11012, 18011, 18012, 19011, 19012, 17011, 17012, 2011, 2012, 13011, 13012, 12011, 12012, 31011, 31012, 15011, 15012, 44011, 44012, 46011, 46012, 47011, 47012, 48011, 48012, 49011, 49012, 50011, 50012, 51011, 51012]
-testing_ids = [14011, 14012, 10011, 10012, 7011, 7012, 21011, 21012, 45011, 45012]
-validation_ids = [1011, 2011, 3011, 4011, 5011, 6011, 7011, 8011, 9011, 10011, 11011, 12011, 13011, 14011, 15011, 16011, 17011, 18011, 19011, 20011, 21011, 22011, 23011, 24011, 25011, 26011, 27011, 28011, 29011, 30011, 31011, 32011, 33011]
-
-
-
-#training_ids = [9019, 9020, 3019, 3020, 26019, 26020, 16019, 16020, 11019, 11020, 18019, 18020, 19019, 19020, 17019, 17020, 2019, 2020, 13019, 13020, 12019, 12020, 31019, 31020, 15019, 15020, 44019, 44020, 46019, 46020, 47019, 47020, 48019, 48020, 49019, 49020, 50019, 50020, 51019, 51020]
-#testing_ids = [14019, 14020, 10019, 10020, 7019, 7020, 21019, 21020, 45019, 45020]
-
-# v10 ids
-#training_ids = [9010, 3010, 26010, 16010, 11010, 18010, 19010, 17010, 2010, 13010, 12010, 31010]
-#testing_ids = [14010, 10010, 7010, 21010]
-
-
-
+# Input here the respectiv IDs - or a function which inputs IDs - of your datasets for training/testing/validation
+training_ids = []
+testing_ids = []
+validation_ids = []
 
 settings = {	'training_ids': training_ids,
 				'testing_ids': testing_ids,
@@ -108,36 +66,15 @@ if not (os.path.exists(BASE_DIR)):
 
 
 # INFO: create_search_grid(UNITS, LRs, BS, N_TIMELAG, SIGNALS_IN, SIGNALS_OUT, FILEPATH, DYN_SCALER)
-params_lst = create_search_grid([40],   												# untis
-								[0.01],													# learning-rate
-								[512],  												# batch-size
-								[160],													# n_timelag
-								[[0.0, 0.0, 0.0]],   									# dropout
-								[['amplitude1']],										# input signals
-								[['phi1', 'r1', 'baseline1']], 							# output signals
+params_lst = create_search_grid([40],   											# untis
+								[0.01],								# learning-rate
+								[512],  							# batch-size
+								[160],								# n_timelag
+								[[0.0, 0.0, 0.0]],   						# dropout
+								[['amplitude1']],						# input signals
+								[['phi1', 'r1', 'baseline1']], 					# output signals
 								['./Data/PhaseCombinedBreathingDataRegular_v13_v2.csv'],	# breathing data filepath
-								['m1to1'])												# dynamic scaler type
-
-#params_lst = create_search_grid([40, 30, 20],
-#								[0.05, 0.01, 0.005, 0.001],
-#								[512],
-#								[160, 80, 40, 20],
-#								[[0.0, 0.0, 0.0]],
-#								[['amplitude1']],
-#								[['phi1', 'r1', 'baseline1']],
-#								['./Data/PhaseCombinedBreathingDataRegular_v12.csv'],
-#								['m1to1'])
-
-
-
-testing_sig1_ids = [14011, 10011, 7011, 21011, 45011]
-testing_sig2_ids = [14012, 10012, 7012, 21012, 45012]
-patient1_ids = [27011, 32011, 36011, 40011]
-patient2_ids = [28011, 33011, 37011, 41011]
-patient3_ids = [29011, 34011, 38011, 42011]
-patient4_ids = [30011, 35011, 39011, 43011]
-
-
+								['m1to1'])							# dynamic scaler type
 
 model_training_manual_gridsearch(params_lst, settings, 'VALIDATION-PHASE')
 
@@ -158,9 +95,6 @@ d = {'y_true': y_true, 'phi_true': phi_r_bl_true[:, 0], 'r_true': phi_r_bl_true[
 	 'y_pred': y_pred, 'phi_pred': phi_r_bl_pred[:, 0], 'r_pred': phi_r_bl_pred[:, 1], 'bl_pred': phi_r_bl_pred[:, 2]}
 df = pd.DataFrame(data=d)
 df.to_csv('./tmp/patients-testing.csv', index=False)
-
-
-
 
 
 
